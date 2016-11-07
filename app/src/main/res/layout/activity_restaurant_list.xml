@@ -11,4 +11,15 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.cbu.dunckel.rushhour.RestaurantListActivity">
 
+    <ExpandableListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/expandableRestaurantList"
+        android:indicatorLeft="270dp"
+        android:indicatorRight="400dp"
+        android:dividerHeight="15dp"
+        android:divider="#00000000"
+        android:childDivider="#00000000"
+        />
+
 </RelativeLayout>
