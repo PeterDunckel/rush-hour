@@ -1,11 +1,14 @@
 package com.cbu.dunckel.rushhour;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,10 +29,16 @@ public class GeoActivity extends RestaurantListActivity implements LocationListe
         setContentView(R.layout.activity_restaurant_list);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         provider = locationManager.getBestProvider(new Criteria(), false);
-        Location location = locationManager.getLastKnownLocation(provider);
-        if(location != null){
-            Log.i("Location Info", "Location acheived!"); } else {
-            Log.i("Location info", "No location :( ");
+
+        if ( ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_COARSE_LOCATION ) != PackageManager.PERMISSION_GRANTED ) {
+
+            Location location = locationManager.getLastKnownLocation(provider);
+
+            if (location != null) {
+                Log.i("Location Info", "Location acheived!");
+            } else {
+                Log.i("Location info", "No location :( ");
+            }
         }
 
     }
@@ -60,13 +69,19 @@ public boolean onCreateOptionsMenu(Menu menu) {
     @Override
     protected void onResume() {
         super.onResume();
-        locationManager.requestLocationUpdates(provider,400,1,this);
+        if ( ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_COARSE_LOCATION ) != PackageManager.PERMISSION_GRANTED ) {
+
+            locationManager.requestLocationUpdates(provider, 400, 1, this);
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        locationManager.removeUpdates(this);
+        if ( ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_COARSE_LOCATION ) != PackageManager.PERMISSION_GRANTED ) {
+
+            locationManager.removeUpdates(this);
+        }
     }
 
     @Override
