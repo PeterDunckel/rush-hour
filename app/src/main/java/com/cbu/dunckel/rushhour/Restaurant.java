@@ -5,6 +5,7 @@ import android.location.Location;
 import android.media.Image;
 
 import java.net.URL;
+import java.util.List;
 
 /**
  * Created by jacobtorres on 11/4/16.
@@ -17,7 +18,11 @@ public class Restaurant {
     private int mWaitTime;
     private String mHours;
     private URL mMenuURL;
-    private int[] mAnalytics; // possible 672 data points (updating every 30 minutes)
+    private List<Point> mAnalytics; // possible 672 data points (updating every 30 minutes)
+
+    public List<Point> getAnalytics() {
+        return mAnalytics;
+    }
 
     Restaurant(String name, int waitTime, String hours){
         this.mName = name;
@@ -33,13 +38,17 @@ public class Restaurant {
         mHours = hours;
     }
 
-    public void setName(String name) {
+    public void getName(String name) {
         mName = name;
     }
 
     public String getName() {
         return mName;
 
+    }
+
+    public void setAnalytics(List<Point> analytics) {
+        mAnalytics = analytics;
     }
 
     public int getWaitTime() {

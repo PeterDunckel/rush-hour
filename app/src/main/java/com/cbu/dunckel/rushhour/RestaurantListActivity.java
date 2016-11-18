@@ -7,9 +7,14 @@ import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
+import java.util.TimeZone;
 
 public class RestaurantListActivity extends AppCompatActivity {
 
@@ -59,14 +64,20 @@ public class RestaurantListActivity extends AppCompatActivity {
         listDataRestaurant = new ArrayList<Restaurant>();
         listDataChild = new HashMap<String, List<Restaurant>>();
 
-        RestaurantSingleton singleton = RestaurantSingleton.getSharedInstance();
+               RestaurantSingleton singleton = RestaurantSingleton.getSharedInstance();
         List<Restaurant> restaurants = singleton.getAllRestaurants();
         Log.d("err",Integer.toString(restaurants.size()));
         for (Restaurant restaurant : restaurants) {
-
             listDataRestaurant.add(restaurant);
-
         }
+
+        //Get epoch time
+        long epochTime = System.currentTimeMillis();
+        System.out.println("Time: "+epochTime);
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
+        System.out.println(TimeZone.getDefault().getID());
+        sdf.setTimeZone(TimeZone.getTimeZone(TimeZone.getDefault().getID()));
+        System.out.println("Time Formatted: " + sdf.format(new Date(epochTime)));
 
     }
 }

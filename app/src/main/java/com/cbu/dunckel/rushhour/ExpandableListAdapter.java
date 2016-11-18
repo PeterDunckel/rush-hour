@@ -14,11 +14,11 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
-
-import static com.cbu.dunckel.rushhour.R.id.lblListHeader;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 
 public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
@@ -64,23 +64,33 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
 
 
+        //To set dates we need to create date formatter that extends IAxisValueFormatter
+        //https://github.com/PhilJay/MPAndroidChart/blob/2d18d0695b5d6d849b249e609f66192664e118e5/MPChartExample/src/com/xxmassdeveloper/mpchartexample/custom/DayAxisValueFormatter.java
+        //https://github.com/PhilJay/MPAndroidChart/wiki/The-AxisValueFormatter-interface
+
         BarChart chart = (BarChart) convertView.findViewById(R.id.chart);
         List<BarEntry> entries = new ArrayList<>();
-        entries.add(new BarEntry(0, 30f));
-        entries.add(new BarEntry(1*restaurantData.getWaitTime(), 80f));
-        entries.add(new BarEntry(2, 60f));
-        entries.add(new BarEntry(3, 50f));
-        entries.add(new BarEntry(4, 70f));
-        entries.add(new BarEntry(5, 60f));
+        for(Point entry : restaurantData.getAnalytics()){
+            entries.add(new BarEntry(entry.getX(), entry.getY()));
+        }
+
+
+        IAxisValueFormatter xAxisFormatter = new DateAxisValueFormatter(chart);
+
+        XAxis xAxis = chart.getXAxis();
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setDrawGridLines(false);
+        xAxis.setLabelCount(7);
+        xAxis.setValueFormatter(xAxisFormatter);
 
         BarDataSet set = new BarDataSet(entries, restaurantData.getName()+"'s Wait Times");
 
         BarData data = new BarData(set);
 
-        data.setBarWidth(0.5f); // set custom bar width
+        data.setBarWidth(100000); // set custom bar width
 
         chart.setData(data);
-        chart.setFitBars(true); // make the x-axis fit exactly all bars
+        chart.setFitBars(false); // make the x-axis fit exactly all bars
         chart.invalidate(); // refresh
 
         return convertView;
