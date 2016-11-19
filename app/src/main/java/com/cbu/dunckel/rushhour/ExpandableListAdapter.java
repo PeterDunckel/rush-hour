@@ -7,10 +7,12 @@ import java.util.List;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.BarChart;
@@ -27,6 +29,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     private List<Restaurant> _listDataRestaurant; // header titles
     // child data in format of header title, child title
     private HashMap<String, List<Restaurant>> _listDataChild;
+    FragmentManager fm;
 
     public ExpandableListAdapter(Context context, List<Restaurant> listOfRestaurants) {
         this._context = context;
@@ -61,6 +64,21 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                 .findViewById(R.id.lblHours);
 
         txtListChild.setText(restaurantData.getHours());
+
+
+        //Set menu button
+        Button menuButton = (Button) convertView.findViewById(R.id.menuBtn);
+        menuButton.setOnClickListener(new View.OnClickListener() {
+                                          @Override
+                                          public void onClick(View v) {
+                                              System.out.println("clicked");
+                                              MenuImgDialogFragment dialogFragment = new MenuImgDialogFragment();
+                                              // Show DialogFragment
+                                              dialogFragment.show(fm, "Dialog Fragment");
+
+                                          }
+                                      }
+        );
 
 
 
@@ -162,4 +180,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     public boolean isChildSelectable(int groupPosition, int childPosition) {
         return true;
     }
+
+    public void setFM(FragmentManager fm){
+        this.fm = fm;
+    }
+
 }

@@ -1,9 +1,11 @@
 package com.cbu.dunckel.rushhour;
 
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
 
@@ -22,6 +24,8 @@ public class RestaurantListActivity extends AppCompatActivity {
     ExpandableListView expListView;
     List<Restaurant> listDataRestaurant;
     HashMap<String, List<Restaurant>> listDataChild;
+    private Button menuButton;
+    FragmentManager fm = getSupportFragmentManager();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,15 +53,11 @@ public class RestaurantListActivity extends AppCompatActivity {
                 }
                 previousGroup = groupPosition;
             }
-//            @Override
-//            public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
-//
-//                System.out.print(groupPosition);
-//                Toast toast = Toast.makeText(getApplicationContext(),  Integer.toString(groupPosition), Toast.LENGTH_LONG);
-//
-//                return false;
-//            }
         });
+
+
+        listAdapter.setFM(fm);
+
     }
 
     private void prepareListData() {
