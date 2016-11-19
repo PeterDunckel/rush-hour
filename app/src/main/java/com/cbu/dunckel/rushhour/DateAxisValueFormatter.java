@@ -23,9 +23,9 @@ public class DateAxisValueFormatter implements IAxisValueFormatter
 
     @Override
     public String getFormattedValue(float value, AxisBase axis) {
-        System.out.println(value);
+//        System.out.println(value);
         long epochTime = (long) value;
-        System.out.println(epochTime);
+//        System.out.println(epochTime);
 
         //SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
