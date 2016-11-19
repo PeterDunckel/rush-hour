@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "780652857899",
+    "firebase_url": "https://rush-hour-d5d79.firebaseio.com",
+    "project_id": "rush-hour-d5d79",
+    "storage_bucket": "rush-hour-d5d79.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:780652857899:android:885bcf2aea23a5b5",
+        "android_client_info": {
+          "package_name": "com.cbu.dunckel.rushhour"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "780652857899-pccm7jprp0qfa83jdhlbrgop49579c5f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCovxz0jKCfOB-VROK_cxoaJLURJnw5EWU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

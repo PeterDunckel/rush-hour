@@ -83,7 +83,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         TextView hourLbl = (TextView) convertView
                 .findViewById(R.id.lblHours);
 
-        hourLbl.setText(restaurantData.getHours());
+        //hourLbl.setText(restaurantData.getHours());
+        hourLbl.setText("Test");
+        System.out.println("Made it here");
 
         //To set dates we need to create date formatter that extends IAxisValueFormatter
         //https://github.com/PhilJay/MPAndroidChart/blob/2d18d0695b5d6d849b249e609f66192664e118e5/MPChartExample/src/com/xxmassdeveloper/mpchartexample/custom/DayAxisValueFormatter.java
