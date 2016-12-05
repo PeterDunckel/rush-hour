@@ -66,11 +66,6 @@ public class RestaurantListActivity extends AppCompatActivity {
         // preparing list data
         //prepareListData();
 
-        setContentView(R.layout.activity_restaurant_list);
-
-        // get the listview
-        expListView = (ExpandableListView) findViewById(R.id.expandableRestaurantList);
-
         mRootRef.addValueEventListener(new ValueEventListener() {
 
             @RequiresApi(api = Build.VERSION_CODES.N)
@@ -129,6 +124,11 @@ public class RestaurantListActivity extends AppCompatActivity {
                     r.setAnalytics(pts);
                     count++;
                 }
+
+                setContentView(R.layout.activity_restaurant_list);
+
+                // get the listview
+                expListView = (ExpandableListView) findViewById(R.id.expandableRestaurantList);
 
                 listAdapter = new ExpandableListAdapter(getApplicationContext(), listDataRestaurant);
 
