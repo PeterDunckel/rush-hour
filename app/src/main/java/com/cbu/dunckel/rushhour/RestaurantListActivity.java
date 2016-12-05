@@ -1,8 +1,11 @@
 package com.cbu.dunckel.rushhour;
 
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,6 +14,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
+
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
@@ -36,6 +43,14 @@ import java.util.concurrent.TimeUnit;
 
 public class RestaurantListActivity extends AppCompatActivity {
 
+    private static final String TAG = "MYSERVICE";
+
+    LocationManager locationManager;
+    LocationListener locationListener;
+
+    double latitude;
+    double longitude;
+
     ExpandableListAdapter listAdapter;
     ExpandableListView expListView;
     List<Restaurant> listDataRestaurant = new ArrayList<Restaurant>();
@@ -49,12 +64,7 @@ public class RestaurantListActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-
-
-
-
-
-
+        getLocation();
 
     }
 
@@ -76,7 +86,7 @@ public class RestaurantListActivity extends AppCompatActivity {
 
                 Iterator it = data.entrySet().iterator();
                 while (it.hasNext()) {
-                    HashMap.Entry pair = (HashMap.Entry)it.next();
+                    HashMap.Entry pair = (HashMap.Entry) it.next();
 
                     String name = (String) pair.getKey();
                     String hours = "Not Available";
@@ -84,10 +94,10 @@ public class RestaurantListActivity extends AppCompatActivity {
 
                     HashMap values = (HashMap) pair.getValue();
                     Iterator itTwo = values.entrySet().iterator();
-                    while (itTwo.hasNext()){
-                        HashMap.Entry set = (HashMap.Entry)itTwo.next();
+                    while (itTwo.hasNext()) {
+                        HashMap.Entry set = (HashMap.Entry) itTwo.next();
 
-                        switch((String)set.getKey()){
+                        switch ((String) set.getKey()) {
                             case "hours":
                                 hours = (String) set.getValue();
                                 break;
@@ -100,7 +110,7 @@ public class RestaurantListActivity extends AppCompatActivity {
                         itTwo.remove();
                     }
 
-                    listDataRestaurant.add(new Restaurant(name, (int)waitTime, hours));
+                    listDataRestaurant.add(new Restaurant(name, (int) waitTime, hours));
 
                     it.remove();
                 }
@@ -111,15 +121,15 @@ public class RestaurantListActivity extends AppCompatActivity {
                 System.out.println("-----------------------");
 
                 //set random graph pts for restaurant
-                for(Restaurant r: listDataRestaurant){
+                for (Restaurant r : listDataRestaurant) {
                     int count = 1;
                     List<Point> pts = new ArrayList<>();
-                    Random rand= new Random();
+                    Random rand = new Random();
                     long epochTime = System.currentTimeMillis();
-                    for(int i = 0; i <10; i++){
+                    for (int i = 0; i < 10; i++) {
 
-                        pts.add(new Point(epochTime,i*(rand.nextInt(50)+1)*count));
-                        epochTime = System.currentTimeMillis() + (i*100000);
+                        pts.add(new Point(epochTime, i * (rand.nextInt(50) + 1) * count));
+                        epochTime = System.currentTimeMillis() + (i * 100000);
                     }
                     r.setAnalytics(pts);
                     count++;
@@ -188,5 +198,65 @@ public class RestaurantListActivity extends AppCompatActivity {
     @Override
     public void onStop() {
         super.onStop();
+    }
+
+    private void uploadLocation(Location location) {
+        Log.i(TAG, "Location to show: " + location);
+        Log.i(TAG, "location.getAccuracy(): " + location.getAccuracy());
+
+        if (location.getAccuracy() < 20) {
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
+            locationManager.removeUpdates(locationListener);
+        }
+    }
+
+    private void getLocation() {
+        // Acquire a reference to the system Location Manager
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        Log.i(TAG, "last known location: " + location);
+
+
+        // Define a listener that responds to location updates
+        locationListener = new LocationListener() {
+            public void onLocationChanged(Location location) {
+                // Called when a new location is found by the network location provider.
+                Log.i(TAG, "location updated: " + location);
+                uploadLocation(location);
+            }
+
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+            }
+
+            public void onProviderEnabled(String provider) {
+            }
+
+            public void onProviderDisabled(String provider) {
+            }
+        };
+
+
+        // Register the listener with the Location Manager to receive location updates
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, locationListener);
+
     }
 }
