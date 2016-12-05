@@ -1,6 +1,20 @@
 package com.cbu.dunckel.rushhour;
 
+import android.os.Build;
+import android.support.annotation.RequiresApi;
+import android.widget.Switch;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import org.json.JSONArray;
+
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -13,10 +27,69 @@ public class RestaurantSingleton {
     // create a static variable with only one instance in memory
     static RestaurantSingleton sharedInstance;
 
-    ArrayList<Restaurant> restaurantArray = new ArrayList<Restaurant>();
+    DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
+
+
+    static ArrayList<Restaurant> restaurantArray = new ArrayList<Restaurant>();
+
+    public void getData(){
+
+        mRootRef.addValueEventListener(new ValueEventListener() {
+
+            @RequiresApi(api = Build.VERSION_CODES.N)
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                HashMap data = (HashMap) dataSnapshot.child("Restaurants").getValue();
+
+                Iterator it = data.entrySet().iterator();
+                while (it.hasNext()) {
+                    HashMap.Entry pair = (HashMap.Entry)it.next();
+
+                    String name = (String) pair.getKey();
+                    String hours = "Not Available";
+                    long waitTime = 0;
+
+                    HashMap values = (HashMap) pair.getValue();
+                    Iterator itTwo = values.entrySet().iterator();
+                    while (itTwo.hasNext()){
+                        HashMap.Entry set = (HashMap.Entry)itTwo.next();
+
+                        switch((String)set.getKey()){
+                            case "hours":
+                                hours = (String) set.getValue();
+                                break;
+                            case "wait time":
+                                waitTime = (long) set.getValue();
+                                break;
+                            default:
+                                break;
+                        }
+                        itTwo.remove();
+                    }
+
+                    restaurantArray.add(new Restaurant(name, (int)waitTime, hours));
+
+                    it.remove();
+                }
+
+                System.out.println("-----------------------");
+                System.out.println(dataSnapshot.child("Restaurants").getValue());
+                System.out.println(restaurantArray.size());
+                System.out.println("-----------------------");
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
 
     RestaurantSingleton() {
-        setAllRestaurants();
+        getData();
     }
 
     public static RestaurantSingleton getSharedInstance(){
@@ -46,8 +119,8 @@ public class RestaurantSingleton {
             List<Point> pts = new ArrayList<>();
             Random rand= new Random();
             long epochTime = System.currentTimeMillis();
-            for(int i = 0; i <2; i++){
-                System.out.println((int) epochTime + " " + (float) epochTime + " " + epochTime );
+            for(int i = 0; i <10; i++){
+
                     pts.add(new Point(epochTime,i*(rand.nextInt(50)+1)*count));
                 epochTime = System.currentTimeMillis() + (i*100000);
             }

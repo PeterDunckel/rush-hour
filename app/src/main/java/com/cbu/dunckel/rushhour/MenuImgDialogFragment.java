@@ -39,7 +39,7 @@ public class MenuImgDialogFragment extends android.support.v4.app.DialogFragment
         getDialog().setTitle("Menu");
 
         menuView = (ImageView) rootView.findViewById(R.id.menuImage);
-        Picasso.with(getActivity()).load("https://www.calbaptist.edu/dining/alumni-dining-commons/Monday%20W3.pdf")
+        Picasso.with(getActivity()).load("http://i.imgur.com/pP0MSby.jpg")
                 .resize(1000,1500)
                 .placeholder(R.drawable.del_me)
                 .error(R.drawable.del_me)

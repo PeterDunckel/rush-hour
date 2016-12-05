@@ -34,6 +34,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     public ExpandableListAdapter(Context context, List<Restaurant> listOfRestaurants) {
         this._context = context;
         this._listDataRestaurant = listOfRestaurants;
+        System.out.println("ExpandableListAdapter constructor called");
 //        this._listDataChild = listChildData;
 
     }
@@ -60,10 +61,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             convertView = infalInflater.inflate(R.layout.listgroup_item, null);
         }
 
-        TextView txtListChild = (TextView) convertView
-                .findViewById(R.id.lblHours);
 
-        txtListChild.setText(restaurantData.getHours());
 
 
         //Set menu button
@@ -81,6 +79,13 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         );
 
 
+        //Set hour label
+        TextView hourLbl = (TextView) convertView
+                .findViewById(R.id.lblHours);
+
+        //hourLbl.setText(restaurantData.getHours());
+        hourLbl.setText("Test");
+        System.out.println("Made it here");
 
         //To set dates we need to create date formatter that extends IAxisValueFormatter
         //https://github.com/PhilJay/MPAndroidChart/blob/2d18d0695b5d6d849b249e609f66192664e118e5/MPChartExample/src/com/xxmassdeveloper/mpchartexample/custom/DayAxisValueFormatter.java

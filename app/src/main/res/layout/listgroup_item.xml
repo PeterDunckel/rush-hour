@@ -9,7 +9,7 @@
         android:layout_height="wrap_content"
         android:textSize="12dip"
         android:layout_margin="15dp"
-        android:layout_gravity="center" />
+        android:layout_gravity="center"/>
 
     <com.github.mikephil.charting.charts.BarChart
         android:id="@+id/chart"
