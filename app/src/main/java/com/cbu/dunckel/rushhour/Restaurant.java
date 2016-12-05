@@ -17,17 +17,18 @@ public class Restaurant {
     private Location mLocation;
     private int mWaitTime;
     private String mHours;
-    private URL mMenuURL;
+    private String mMenuURL;
     private List<Point> mAnalytics; // possible 672 data points (updating every 30 minutes)
 
     public List<Point> getAnalytics() {
         return mAnalytics;
     }
 
-    Restaurant(String name, int waitTime, String hours){
+    Restaurant(String name, int waitTime, String hours, String menuURL){
         this.mName = name;
         this.mWaitTime = waitTime;
         this.mHours = hours;
+        this.mMenuURL = menuURL;
     }
 
     public String getHours() {
@@ -36,6 +37,14 @@ public class Restaurant {
 
     public void setHours(String hours) {
         mHours = hours;
+    }
+
+    public String getMenuURL() {
+        return mMenuURL;
+    }
+
+    public void setMenuURL(String menuURL) {
+        mMenuURL = menuURL;
     }
 
     public void getName(String name) {

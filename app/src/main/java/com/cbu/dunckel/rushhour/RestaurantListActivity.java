@@ -49,13 +49,6 @@ public class RestaurantListActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-
-
-
-
-
-
-
     }
 
     @Override
@@ -76,6 +69,9 @@ public class RestaurantListActivity extends AppCompatActivity {
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                if(!listDataRestaurant.isEmpty()) {
+                    listDataRestaurant.removeAll(listDataRestaurant);
+                }
 
                 HashMap data = (HashMap) dataSnapshot.child("Restaurants").getValue();
 
@@ -85,6 +81,7 @@ public class RestaurantListActivity extends AppCompatActivity {
 
                     String name = (String) pair.getKey();
                     String hours = "Not Available";
+                    String menuURL = "";
                     long waitTime = 0;
 
                     HashMap values = (HashMap) pair.getValue();
@@ -99,13 +96,16 @@ public class RestaurantListActivity extends AppCompatActivity {
                             case "wait time":
                                 waitTime = (long) set.getValue();
                                 break;
+                            case "menu":
+                                menuURL = (String) set.getValue();
+                                break;
                             default:
                                 break;
                         }
                         itTwo.remove();
                     }
 
-                    listDataRestaurant.add(new Restaurant(name, (int)waitTime, hours));
+                    listDataRestaurant.add(new Restaurant(name, (int)waitTime, hours, menuURL));
 
                     it.remove();
                 }

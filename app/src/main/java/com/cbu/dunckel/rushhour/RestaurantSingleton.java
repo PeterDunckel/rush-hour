@@ -49,6 +49,7 @@ public class RestaurantSingleton {
                     String name = (String) pair.getKey();
                     String hours = "Not Available";
                     long waitTime = 0;
+                    String menuURL = "";
 
                     HashMap values = (HashMap) pair.getValue();
                     Iterator itTwo = values.entrySet().iterator();
@@ -62,13 +63,16 @@ public class RestaurantSingleton {
                             case "wait time":
                                 waitTime = (long) set.getValue();
                                 break;
+                            case "menu":
+                                menuURL = (String) set.getValue();
+                                break;
                             default:
                                 break;
                         }
                         itTwo.remove();
                     }
 
-                    restaurantArray.add(new Restaurant(name, (int)waitTime, hours));
+                    restaurantArray.add(new Restaurant(name, (int)waitTime, hours, menuURL));
 
                     it.remove();
                 }
@@ -107,11 +111,11 @@ public class RestaurantSingleton {
 
     public void setAllRestaurants(){
 
-        restaurantArray.add(new Restaurant("ADC", 1, "7:00am - 8:00pm"));
-        restaurantArray.add(new Restaurant("Wandas", 3, "7:00am - 8:30pm"));
-        restaurantArray.add(new Restaurant("Briscos", 5, "7:00am - 11:00pm"));
-        restaurantArray.add(new Restaurant("Chick-fil-a", 13, "10:30am - 7:00pm"));
-        restaurantArray.add(new Restaurant("El Monte", 25, "10:30am - 7:00pm"));
+//        restaurantArray.add(new Restaurant("ADC", 1, "7:00am - 8:00pm"));
+//        restaurantArray.add(new Restaurant("Wandas", 3, "7:00am - 8:30pm"));
+//        restaurantArray.add(new Restaurant("Briscos", 5, "7:00am - 11:00pm"));
+//        restaurantArray.add(new Restaurant("Chick-fil-a", 13, "10:30am - 7:00pm"));
+//        restaurantArray.add(new Restaurant("El Monte", 25, "10:30am - 7:00pm"));
 
         //set random graph pts for restaurant
         for(Restaurant r: restaurantArray){

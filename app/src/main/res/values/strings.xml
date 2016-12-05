@@ -1,4 +1,10 @@
 <resources>
     <string name="app_name">Rush:Hour</string>
     <string name="app_header">Restaurants</string>
+    <string name="pdf_show_online_dialog_title">Dialog Title</string>
+    <string name="pdf_show_online_dialog_question">dialog question</string>
+    <string name="pdf_show_online_dialog_button_no">btn no</string>
+    <string name="pdf_show_online_dialog_button_yes">btn yes</string>
+    <string name="pdf_show_local_progress_title">progress title</string>
+    <string name="pdf_show_local_progress_content">progress content</string>
 </resources>
