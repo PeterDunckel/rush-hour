@@ -1,12 +1,20 @@
 package com.cbu.dunckel.rushhour;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Environment;
 import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +22,7 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -67,15 +76,36 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         //Set menu button
         Button menuButton = (Button) convertView.findViewById(R.id.menuBtn);
         menuButton.setOnClickListener(new View.OnClickListener() {
-                                          @Override
-                                          public void onClick(View v) {
-                                              System.out.println("clicked");
-                                              MenuImgDialogFragment dialogFragment = new MenuImgDialogFragment();
-                                              // Show DialogFragment
-                                              dialogFragment.show(fm, "Dialog Fragment");
+             @Override
+             public void onClick(View v) {
+                 System.out.println("clicked");
+                 String url = "http://www.orimi.com/pdf-test.pdf";
 
-                                          }
-                                      }
+//                 MenuImgDialogFragment dialogFragment = new MenuImgDialogFragment();
+//                 //Pass Arguments
+//                 Bundle args = new Bundle();
+//                 args.putInt("num", num);
+//                 dialogFragment.setArguments(args);
+//                 // Show DialogFragment
+//                 dialogFragment.show(fm, "Dialog Fragment");
+
+                 String uniqueID = UUID.randomUUID().toString();
+                 String[] fileName = url.split("/");
+//            download(url, fileName[fileName.length-1]);
+//                 download(url, uniqueID+".pdf");
+                 System.out.println(restaurantData.getMenuURL());
+                 download(restaurantData.getMenuURL(), uniqueID+".pdf");
+//            view(fileName[fileName.length-1]);
+                 view(uniqueID+".pdf");
+
+
+
+//        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+//        browserIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//        _context.startActivity(browserIntent);
+
+             }
+           }
         );
 
 
@@ -85,7 +115,6 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         //hourLbl.setText(restaurantData.getHours());
         hourLbl.setText("Test");
-        System.out.println("Made it here");
 
         //To set dates we need to create date formatter that extends IAxisValueFormatter
         //https://github.com/PhilJay/MPAndroidChart/blob/2d18d0695b5d6d849b249e609f66192664e118e5/MPChartExample/src/com/xxmassdeveloper/mpchartexample/custom/DayAxisValueFormatter.java
@@ -93,7 +122,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         BarChart chart = (BarChart) convertView.findViewById(R.id.chart);
         List<BarEntry> entries = new ArrayList<>();
-        for(Point entry : restaurantData.getAnalytics()){
+        for(GraphPoint entry : restaurantData.getAnalytics()){
             entries.add(new BarEntry(entry.getX(), entry.getY()));
         }
 
@@ -188,6 +217,50 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     public void setFM(FragmentManager fm){
         this.fm = fm;
+    }
+
+    public void download(String url, String fileName)
+    {
+        new DownloadFile().execute(url, fileName);
+    }
+
+    public void view(String url)
+    {
+        File pdfFile = new File(Environment.getExternalStorageDirectory() + "/RushHourPdfs/" + url);  // -> filename = maven.pdf
+        Uri path = Uri.fromFile(pdfFile);
+        System.out.println("Uri Path: "+ path);
+        Intent pdfIntent = new Intent(Intent.ACTION_VIEW);
+        pdfIntent.setDataAndType(path, "application/pdf");
+        pdfIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        pdfIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        try{
+            _context.startActivity(pdfIntent);
+        }catch(ActivityNotFoundException e){
+            Toast.makeText(_context.getApplicationContext(), "No Application available to view PDF", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private class DownloadFile extends AsyncTask<String, Void, Void> {
+
+        @Override
+        protected Void doInBackground(String... strings) {
+            String fileUrl = strings[0];   // -> pdf url
+            String fileName = strings[1];  // -> pdf name
+            String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
+            File folder = new File(extStorageDirectory, "RushHourPdfs");
+            folder.mkdir();
+
+            File pdfFile = new File(folder, fileName);
+
+            try{
+                pdfFile.createNewFile();
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+            FileDownloader.downloadFile(fileUrl, pdfFile);
+            return null;
+        }
     }
 
 }

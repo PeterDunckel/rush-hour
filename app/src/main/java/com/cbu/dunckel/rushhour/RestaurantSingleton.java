@@ -2,7 +2,6 @@ package com.cbu.dunckel.rushhour;
 
 import android.os.Build;
 import android.support.annotation.RequiresApi;
-import android.widget.Switch;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -10,8 +9,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import org.json.JSONArray;
-
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -50,6 +48,8 @@ public class RestaurantSingleton {
                     String hours = "Not Available";
                     long waitTime = 0;
                     String menuURL = "";
+                    String backgroundImg = null;
+                    String slimBackgroundImg = null;
 
                     HashMap values = (HashMap) pair.getValue();
                     Iterator itTwo = values.entrySet().iterator();
@@ -66,13 +66,19 @@ public class RestaurantSingleton {
                             case "menu":
                                 menuURL = (String) set.getValue();
                                 break;
+                            case "background image":
+                                backgroundImg = (String) set.getValue();
+                                break;
+                            case "slim background image":
+                                slimBackgroundImg = (String) set.getValue();
+                                break;
                             default:
                                 break;
                         }
                         itTwo.remove();
                     }
 
-                    restaurantArray.add(new Restaurant(name, (int)waitTime, hours, menuURL));
+                    restaurantArray.add(new Restaurant(name, (int)waitTime, hours, menuURL, backgroundImg, slimBackgroundImg));
 
                     it.remove();
                 }
@@ -120,12 +126,12 @@ public class RestaurantSingleton {
         //set random graph pts for restaurant
         for(Restaurant r: restaurantArray){
             int count = 1;
-            List<Point> pts = new ArrayList<>();
+            List<GraphPoint> pts = new ArrayList<>();
             Random rand= new Random();
             long epochTime = System.currentTimeMillis();
             for(int i = 0; i <10; i++){
 
-                    pts.add(new Point(epochTime,i*(rand.nextInt(50)+1)*count));
+                    pts.add(new GraphPoint(epochTime,i*(rand.nextInt(50)+1)*count));
                 epochTime = System.currentTimeMillis() + (i*100000);
             }
             r.setAnalytics(pts);

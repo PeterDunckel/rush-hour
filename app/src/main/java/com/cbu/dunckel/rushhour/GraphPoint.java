@@ -4,12 +4,12 @@ package com.cbu.dunckel.rushhour;
  * Created by Dunckel on 11/17/2016.
  */
 
-public class Point {
+public class GraphPoint {
 
     private long x;
     private int y;
 
-    public Point(long x, int y) {
+    public GraphPoint(long x, int y) {
         this.x = x;
         this.y = y;
     }

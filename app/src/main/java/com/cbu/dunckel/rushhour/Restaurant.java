@@ -1,8 +1,6 @@
 package com.cbu.dunckel.rushhour;
 
-import android.graphics.drawable.Drawable;
 import android.location.Location;
-import android.media.Image;
 
 import java.net.URL;
 import java.util.List;
@@ -18,17 +16,21 @@ public class Restaurant {
     private int mWaitTime;
     private String mHours;
     private String mMenuURL;
-    private List<Point> mAnalytics; // possible 672 data points (updating every 30 minutes)
+    private List<GraphPoint> mAnalytics; // possible 672 data points (updating every 30 minutes)
+    private String backgroundImg;
+    private String slimBackgroundImg;
 
-    public List<Point> getAnalytics() {
+    public List<GraphPoint> getAnalytics() {
         return mAnalytics;
     }
 
-    Restaurant(String name, int waitTime, String hours, String menuURL){
+    Restaurant(String name, int waitTime, String hours, String menuURL, String backgroundImg, String slimBackgroundImg){
         this.mName = name;
         this.mWaitTime = waitTime;
         this.mHours = hours;
         this.mMenuURL = menuURL;
+        this.backgroundImg = backgroundImg;
+        this.slimBackgroundImg = slimBackgroundImg;
     }
 
     public String getHours() {
@@ -56,11 +58,27 @@ public class Restaurant {
 
     }
 
-    public void setAnalytics(List<Point> analytics) {
+    public void setAnalytics(List<GraphPoint> analytics) {
         mAnalytics = analytics;
     }
 
     public int getWaitTime() {
         return mWaitTime;
+    }
+
+    public String getBackgroundImg() {
+        return backgroundImg;
+    }
+
+    public void setBackgroundImg(String backgroundImg) {
+        this.backgroundImg = backgroundImg;
+    }
+
+    public String getSlimBackgroundImg() {
+        return slimBackgroundImg;
+    }
+
+    public void setSlimBackgroundImg(String slimBackgroundImg) {
+        this.slimBackgroundImg = slimBackgroundImg;
     }
 }

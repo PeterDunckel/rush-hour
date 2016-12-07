@@ -41,7 +41,7 @@ public class MenuImgDialogFragment extends android.support.v4.app.DialogFragment
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.menu_fragment, container, false);
+//        View rootView = inflater.inflate(R.layout.menu_fragment, container, false);
         String url = "http://www.orimi.com/pdf-test.pdf";
 //        getDialog().setTitle("Menu");
 
@@ -54,10 +54,8 @@ public class MenuImgDialogFragment extends android.support.v4.app.DialogFragment
 
         String uniqueID = UUID.randomUUID().toString();
             String[] fileName = url.split("/");
-            System.out.println(url);
 //            download(url, fileName[fileName.length-1]);
         download(url, uniqueID+".pdf");
-            System.out.println(fileName[fileName.length-1]);
 //            view(fileName[fileName.length-1]);
             view(uniqueID+".pdf");
 
@@ -80,7 +78,7 @@ public class MenuImgDialogFragment extends android.support.v4.app.DialogFragment
 //        menuView.setImageDrawable(LoadImageFromWebOperations("app/res/drawable/ic_android_black_24dp.xml"));
 //        getDialog().show();;
 
-        return rootView;
+        return null;
     }
 
     public void download(String url, String fileName)
