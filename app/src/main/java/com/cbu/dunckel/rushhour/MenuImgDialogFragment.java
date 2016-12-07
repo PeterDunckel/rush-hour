@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -41,23 +42,36 @@ public class MenuImgDialogFragment extends android.support.v4.app.DialogFragment
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-//        View rootView = inflater.inflate(R.layout.menu_fragment, container, false);
-        String url = "http://www.orimi.com/pdf-test.pdf";
-//        getDialog().setTitle("Menu");
+        View rootView = inflater.inflate(R.layout.menu_fragment, container, false);
 
-//        menuView = (ImageView) rootView.findViewById(R.id.menuImage);
-//        Picasso.with(getActivity()).load("http://i.imgur.com/pP0MSby.jpg")
-//                .resize(1000,1500)
-//                .placeholder(R.drawable.del_me)
-//                .error(R.drawable.del_me)
-//                .into(menuView);
+        getDialog().setTitle("Menu");
 
-        String uniqueID = UUID.randomUUID().toString();
-            String[] fileName = url.split("/");
-//            download(url, fileName[fileName.length-1]);
-        download(url, uniqueID+".pdf");
-//            view(fileName[fileName.length-1]);
-            view(uniqueID+".pdf");
+        Bundle bundle = getArguments();
+        String url = (String) bundle.get("url");
+        int screenHeight = (Integer) bundle.get("screenHeight");
+        int screenWidth = (Integer) bundle.get("screenWidth");
+        System.out.println("url "+url);
+
+            menuView = (ImageView) rootView.findViewById(R.id.menuImage);
+        if(!url.isEmpty()) {
+            Picasso.with(rootView.getContext()).load(url)
+                    .resize(screenWidth, screenHeight)
+                    .placeholder(R.drawable.menu_not_available)
+                    .error(R.drawable.menu_not_available)
+                    .into(menuView);
+        } else {
+            Picasso.with(rootView.getContext()).load(R.drawable.menu_not_available)
+                    .resize(screenWidth, screenHeight)
+                    .placeholder(R.drawable.menu_not_available)
+                    .error(R.drawable.menu_not_available)
+                    .into(menuView);
+        }
+//        String uniqueID = UUID.randomUUID().toString();
+//            String[] fileName = url.split("/");
+////            download(url, fileName[fileName.length-1]);
+//        download(url, uniqueID+".pdf");
+////            view(fileName[fileName.length-1]);
+//            view(uniqueID+".pdf");
 
 //        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
 //        startActivity(browserIntent);
@@ -76,9 +90,9 @@ public class MenuImgDialogFragment extends android.support.v4.app.DialogFragment
 
 //        StrictMode.setThreadPolicy(policy);
 //        menuView.setImageDrawable(LoadImageFromWebOperations("app/res/drawable/ic_android_black_24dp.xml"));
-//        getDialog().show();;
+        getDialog().show();
 
-        return null;
+        return rootView;
     }
 
     public void download(String url, String fileName)

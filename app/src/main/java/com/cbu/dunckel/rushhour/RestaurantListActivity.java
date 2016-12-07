@@ -57,6 +57,9 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -79,7 +82,7 @@ public class RestaurantListActivity extends AppCompatActivity {
 
     private int currentPos;
     private int previousPos = -1;
-    private List<RelativeLayout> screenLayoutList = new ArrayList<>();
+    private List<CustomLayout> screenLayoutList = new ArrayList<>();
 
 
     @Override
@@ -127,7 +130,7 @@ public class RestaurantListActivity extends AppCompatActivity {
 
     private class RestaurantHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        private RelativeLayout screenLayout;
+        private CustomLayout screenLayout;
         private ImageView backgroundImg;
         private TextView lblListHeader;
         private TextView lblWaitTime;
@@ -148,7 +151,7 @@ public class RestaurantListActivity extends AppCompatActivity {
                     itemView.findViewById(R.id.lblWaitTime);
             minLbl = (TextView)
                     itemView.findViewById(R.id.minLbl);
-            screenLayout = (RelativeLayout)
+            screenLayout = (CustomLayout)
                     itemView.findViewById(R.id.screenLayout);
             screenLayoutList.add(screenLayout);
 
@@ -157,18 +160,22 @@ public class RestaurantListActivity extends AppCompatActivity {
 
         public void bindRestaurant(Restaurant restaurant){
             mRestaurant = restaurant;
+            uploadScreenLayout(mRestaurant.getSlimBackgroundImg(), listDataRestaurant.indexOf(restaurant));
 
             lblListHeader.setText(mRestaurant.getName());
             System.out.println("Wait time:"+mRestaurant.getWaitTime());
+            lblWaitTime.setText(Integer.toString(mRestaurant.getWaitTime()));
             if(mRestaurant.getWaitTime() < 6){
+                System.out.println("Wait time less than 6");
                 lblWaitTime.setTextColor(Color.parseColor("#036814"));
             } else if(mRestaurant.getWaitTime() > 6 && mRestaurant.getWaitTime() < 16){
+                System.out.println("Wait time greater than 6 and less than 16");
                 lblWaitTime.setTextColor(Color.parseColor("#FF8000"));
             } else{
+                System.out.println("Wait time greater than 16");
                 lblWaitTime.setTextColor(Color.RED);
             }
             System.out.println(listDataRestaurant.indexOf(restaurant));
-            uploadScreenLayout(mRestaurant.getSlimBackgroundImg(), listDataRestaurant.indexOf(restaurant));
         }
 
         @Override
@@ -179,6 +186,15 @@ public class RestaurantListActivity extends AppCompatActivity {
             }
 
             RelativeLayout mainLayout;
+            TextView lblHours;
+            Button menuBtn;
+            TextView prevWaitLbl;
+            TextView prevMinLbl;
+            ImageView arrow;
+            Drawable upArrow = getResources().getDrawable(R.drawable.up_arrow);
+            Drawable downArrow = getResources().getDrawable(R.drawable.down_arrow);
+
+
             int viewPosition = mRestaurantRecyclerView.getChildAdapterPosition(v);
             int animDownTime = 190;
             int animUpTime = 190;
@@ -206,9 +222,22 @@ public class RestaurantListActivity extends AppCompatActivity {
                     mainLayout = (RelativeLayout)
                             mRestaurantRecyclerView.getChildAt(previousPos).findViewById(R.id.content);
                     mainLayout.setVisibility(View.GONE);
+                    lblHours  = (TextView)
+                            mRestaurantRecyclerView.getChildAt(previousPos).findViewById(R.id.lblHours);
+                    lblHours.setVisibility(View.GONE);
+                    menuBtn  = (Button)
+                            mRestaurantRecyclerView.getChildAt(previousPos).findViewById(R.id.menuBtn);
+                    menuBtn.setVisibility(View.GONE);
 
-                    lblWaitTime.setTextSize(24);
-                    minLbl.setTextSize(24);
+                    prevWaitLbl = (TextView) mRestaurantRecyclerView.getChildAt(previousPos).findViewById(R.id.lblWaitTime);
+                    prevWaitLbl.setTextSize(24);
+                    prevMinLbl = (TextView) mRestaurantRecyclerView.getChildAt(previousPos).findViewById(R.id.minLbl);
+                    prevMinLbl.setTextSize(24);
+
+                    //Set arrow to down
+                    arrow = (ImageView) mRestaurantRecyclerView.getChildAt(previousPos).findViewById(R.id.arrowView);
+                    arrow.setImageDrawable(downArrow);
+
                     // Change background image to slim
                     uploadScreenLayout(listDataRestaurant.get(previousPos).getSlimBackgroundImg(), previousPos);
                 }
@@ -221,15 +250,24 @@ public class RestaurantListActivity extends AppCompatActivity {
                 mainLayout = (RelativeLayout) v.findViewById(R.id.content);
                 mainLayout.setVisibility(View.VISIBLE);
                 formChart(v);
-                formMenuBtn(v);
+                formMenuBtn(v, screenHeight, screenWidth);
+
+                menuBtn  = (Button)
+                        v.findViewById(R.id.menuBtn);
+                menuBtn.setVisibility(View.VISIBLE);
 
                 //Set hour label
-                TextView hourLbl = (TextView) v
-                        .findViewById(R.id.lblHours);
-                hourLbl.setText(mRestaurant.getHours());
+                lblHours  = (TextView)
+                        v.findViewById(R.id.lblHours);
+                lblHours.setVisibility(View.VISIBLE);
+                lblHours.setText(mRestaurant.getHours());
 
                 lblWaitTime.setTextSize(30);
                 minLbl.setTextSize(30);
+
+                //Set arrow to up
+                arrow = (ImageView) v.findViewById(R.id.arrowView);
+                arrow.setImageDrawable(upArrow);
 
                 // Change background image to large
                 uploadScreenLayout(mRestaurant.getBackgroundImg(), currentPosition);
@@ -244,11 +282,21 @@ public class RestaurantListActivity extends AppCompatActivity {
                 mainLayout = (RelativeLayout)
                         mRestaurantRecyclerView.getChildAt(currentPosition).findViewById(R.id.content);
                 mainLayout.setVisibility(View.GONE);
+                lblHours  = (TextView)
+                        mRestaurantRecyclerView.getChildAt(previousPos).findViewById(R.id.lblHours);
+                lblHours.setVisibility(View.GONE);
+                menuBtn  = (Button)
+                        mRestaurantRecyclerView.getChildAt(previousPos).findViewById(R.id.menuBtn);
+                menuBtn.setVisibility(View.GONE);
 
                 lblWaitTime.setTextSize(24);
                 minLbl.setTextSize(24);
                 // Change background image to slim
                 uploadScreenLayout(mRestaurant.getSlimBackgroundImg(), currentPosition);
+
+                //Set arrow to down
+                arrow = (ImageView) mRestaurantRecyclerView.getChildAt(previousPos).findViewById(R.id.arrowView);
+                arrow.setImageDrawable(downArrow);
 
                 previousPos = -1;
             }
@@ -256,25 +304,8 @@ public class RestaurantListActivity extends AppCompatActivity {
         }
 
         private void uploadScreenLayout(String url, final int pos){
-
             System.out.println("upload Screen "+ url);
-            Picasso.with(getApplicationContext()).load(url).into(new Target(){
-
-                @Override
-                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                    screenLayoutList.get(pos).setBackground(new BitmapDrawable(getApplicationContext().getResources(), bitmap));
-                }
-
-                @Override
-                public void onBitmapFailed(final Drawable errorDrawable) {
-                    Log.d("TAG", "FAILED");
-                }
-
-                @Override
-                public void onPrepareLoad(final Drawable placeHolderDrawable) {
-                    Log.d("TAG", "Prepare Load");
-                }
-            });
+            Picasso.with(getApplicationContext()).load(url).into(screenLayoutList.get(pos));
         }
 
         private void formChart(View v){
@@ -308,32 +339,29 @@ public class RestaurantListActivity extends AppCompatActivity {
             chart.invalidate(); // refresh
         }
 
-        private void formMenuBtn(View v){
+        private void formMenuBtn(View v, final int screenHeight, final int screenWidth){
             //Set menu button
             Button menuButton = (Button) v.findViewById(R.id.menuBtn);
             menuButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     System.out.println("clicked");
-                    String url = "http://www.pdf995.com/samples/pdf.pdf";
+                    String url = mRestaurant.getMenuURL();
 
-//                 MenuImgDialogFragment dialogFragment = new MenuImgDialogFragment();
-//                 //Pass Arguments
-//                 Bundle args = new Bundle();
-//                 args.putInt("num", num);
-//                 dialogFragment.setArguments(args);
-//                 // Show DialogFragment
-//                 dialogFragment.show(fm, "Dialog Fragment");
+                 MenuImgDialogFragment dialogFragment = new MenuImgDialogFragment();
+                 //Pass Arguments
+                 Bundle args = new Bundle();
+                 args.putString("url", url);
+                 args.putInt("screenHeight", screenHeight);
+                 args.putInt("screenWidth", screenWidth);
+                 dialogFragment.setArguments(args);
+                 // Show DialogFragment
+                 dialogFragment.show(fm, "Dialog Fragment");
 
-                    String uniqueID = UUID.randomUUID().toString();
-                    String[] fileName = url.split("/");
-//            download(url, fileName[fileName.length-1]);
-                    System.out.println(url);
-                    download(url, uniqueID+".pdf");
-//                    System.out.println(mRestaurant.getMenuURL());
-//                    download(mRestaurant.getMenuURL(), uniqueID + ".pdf");
-//            view(fileName[fileName.length-1]);
-                    view(uniqueID + ".pdf");
+//                    String uniqueID = UUID.randomUUID().toString();
+//                    System.out.println(url);
+//                    download(url, uniqueID+".pdf");
+//                    view(uniqueID + ".pdf");
 
                 }
             });
@@ -346,38 +374,19 @@ public class RestaurantListActivity extends AppCompatActivity {
 
         public void view(String url)
         {
-//            File pdfFile = new File(Environment.getExternalStorageDirectory() + "/RushHourPdfs/" + url);  // -> filename = maven.pdf
-//            Uri path = Uri.fromFile(pdfFile);
-//            System.out.println("Uri Path: "+ path);
-//            Intent pdfIntent = new Intent(Intent.ACTION_VIEW);
-//            pdfIntent.setDataAndType(path, "application/pdf");
-//            pdfIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//            pdfIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//
-//            try{
-//                startActivity(pdfIntent);
-//            }catch(ActivityNotFoundException e){
-//                Toast.makeText(getApplicationContext(), "No Application available to view PDF", Toast.LENGTH_SHORT).show();
-//            }
-            // create a new renderer
-//            PdfRenderer renderer = new PdfRenderer(getSeekableFileDescriptor());
-//
-//            // let us just render all pages
-//            final int pageCount = renderer.getPageCount();
-//            for (int i = 0; i < pageCount; i++) {
-//                PdfRenderer.Page page = renderer.openPage(i);
-//
-//                // say we render for showing on the screen
-//                page.render(mBitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
-//
-//                // do stuff with the bitmap
-//
-//                // close the page
-//                page.close();
-//            }
-//
-//            // close the renderer
-//            renderer.close();
+            File pdfFile = new File(Environment.getExternalStorageDirectory() + "/RushHourPdfs/" + url);  // -> filename = maven.pdf
+            Uri path = Uri.fromFile(pdfFile);
+            System.out.println("Uri Path: "+ path);
+            Intent pdfIntent = new Intent(Intent.ACTION_VIEW);
+            pdfIntent.setDataAndType(path, "application/pdf");
+            pdfIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            pdfIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            try{
+                startActivity(pdfIntent);
+            }catch(ActivityNotFoundException e){
+                Toast.makeText(getApplicationContext(), "No Application available to view PDF", Toast.LENGTH_SHORT).show();
+            }
         }
 
         private class DownloadFile extends AsyncTask<String, Void, Void> {
@@ -486,8 +495,12 @@ public class RestaurantListActivity extends AppCompatActivity {
                     }
 
                     listDataRestaurant.add(new Restaurant(name, (int)waitTime, hours, menuURL, backgroundImage, slimBackgroundImg));
-
                     it.remove();
+                }
+
+                //Sort restaurant list by wait time (smallest to greatest wait time)
+                if (!listDataRestaurant.isEmpty()) {
+                    Collections.sort(listDataRestaurant);
                 }
 
                 System.out.println("-----------------------");

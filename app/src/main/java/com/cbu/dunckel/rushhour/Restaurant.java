@@ -3,13 +3,14 @@ package com.cbu.dunckel.rushhour;
 import android.location.Location;
 
 import java.net.URL;
+import java.util.Comparator;
 import java.util.List;
 
 /**
  * Created by jacobtorres on 11/4/16.
  */
 
-public class Restaurant {
+public class Restaurant implements Comparable<Restaurant>{
 
     private String mName;
     private Location mLocation;
@@ -80,5 +81,16 @@ public class Restaurant {
 
     public void setSlimBackgroundImg(String slimBackgroundImg) {
         this.slimBackgroundImg = slimBackgroundImg;
+    }
+
+    @Override
+    public int compareTo(Restaurant o) {
+        if(this.mWaitTime < o.getWaitTime()){
+            return -1;
+        } else if ( this.mWaitTime > o.getWaitTime()){
+            return 1;
+        } else{
+            return 0;
+        }
     }
 }
