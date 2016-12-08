@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,7 +30,9 @@ import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.widget.Button;
 import android.widget.ExpandableListView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -110,7 +113,6 @@ public class RestaurantListActivity extends AppCompatActivity {
     }
 
 
-
     @Override
     public void onResume() {
         super.onResume();
@@ -118,7 +120,7 @@ public class RestaurantListActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState){
+    public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 //        outState.putBoolean(SAVED_SUBTITLE_VISIBLE, mSubtitleVisible);
     }
@@ -137,10 +139,10 @@ public class RestaurantListActivity extends AppCompatActivity {
         private TextView minLbl;
         private Restaurant mRestaurant;
         private boolean firstClick = true;
-        private int viewHeight ;
+        private int viewHeight;
 
 
-        public RestaurantHolder(View itemView){
+        public RestaurantHolder(View itemView) {
             super(itemView);
 
             itemView.setOnClickListener(this);
@@ -158,36 +160,33 @@ public class RestaurantListActivity extends AppCompatActivity {
 
         }
 
-        public void bindRestaurant(Restaurant restaurant){
+        public void bindRestaurant(Restaurant restaurant) {
             mRestaurant = restaurant;
             uploadScreenLayout(mRestaurant.getSlimBackgroundImg(), listDataRestaurant.indexOf(restaurant));
-
             lblListHeader.setText(mRestaurant.getName());
-            System.out.println("Wait time:"+mRestaurant.getWaitTime());
             lblWaitTime.setText(Integer.toString(mRestaurant.getWaitTime()));
-            if(mRestaurant.getWaitTime() < 6){
-                System.out.println("Wait time less than 6");
-                lblWaitTime.setTextColor(Color.parseColor("#036814"));
-            } else if(mRestaurant.getWaitTime() > 6 && mRestaurant.getWaitTime() < 16){
-                System.out.println("Wait time greater than 6 and less than 16");
-                lblWaitTime.setTextColor(Color.parseColor("#FF8000"));
-            } else{
-                System.out.println("Wait time greater than 16");
-                lblWaitTime.setTextColor(Color.RED);
+            //Set colors for wait time label
+            if (mRestaurant.getWaitTime() <= 5) {
+                lblWaitTime.setTextColor(Color.parseColor("#49C4A4"));
+            } else if (mRestaurant.getWaitTime() > 5 && mRestaurant.getWaitTime() <= 10) {
+                lblWaitTime.setTextColor(Color.parseColor("#E5AA15"));
+            } else if (mRestaurant.getWaitTime() > 10 && mRestaurant.getWaitTime() <= 15) {
+                lblWaitTime.setTextColor(Color.parseColor("#D36011"));
+            } else {
+                lblWaitTime.setTextColor(Color.parseColor("#CC1A2B"));
             }
-            System.out.println(listDataRestaurant.indexOf(restaurant));
         }
 
         @Override
         public void onClick(View v) {
-            if(firstClick) {
+            if (firstClick) {
                 viewHeight = v.getHeight();
                 firstClick = false;
             }
 
             RelativeLayout mainLayout;
             TextView lblHours;
-            Button menuBtn;
+            ImageButton menuBtn;
             TextView prevWaitLbl;
             TextView prevMinLbl;
             ImageView arrow;
@@ -207,25 +206,25 @@ public class RestaurantListActivity extends AppCompatActivity {
             int screenWidth = size.x;
             int screenHeight = size.y;
 
-            int expandedViewHeight = viewHeight+(screenHeight*1/3);
+            int expandedViewHeight = viewHeight + (screenHeight * 3 / 8);
             System.out.println("\nIteration........\n ");
             //Modify item height and add widgets of item, hide widgets of all other items
             int currentPosition = mRestaurantRecyclerView.getChildAdapterPosition(v);
 
-            if(previousPos != currentPosition){
-                System.out.println(previousPos+ " "+ currentPosition);
+            if (previousPos != currentPosition) {
+                System.out.println(previousPos + " " + currentPosition);
                 // First - collapse previous position (set height to initial height)
-                if(previousPos != -1) {
+                if (previousPos != -1) {
                     Animation ani = new ShowAnim(mRestaurantRecyclerView.getChildAt(previousPos), initialViewHeight, expandedViewHeight);
                     ani.setDuration(animUpTime);
                     mRestaurantRecyclerView.getChildAt(previousPos).startAnimation(ani);
                     mainLayout = (RelativeLayout)
                             mRestaurantRecyclerView.getChildAt(previousPos).findViewById(R.id.content);
                     mainLayout.setVisibility(View.GONE);
-                    lblHours  = (TextView)
+                    lblHours = (TextView)
                             mRestaurantRecyclerView.getChildAt(previousPos).findViewById(R.id.lblHours);
                     lblHours.setVisibility(View.GONE);
-                    menuBtn  = (Button)
+                    menuBtn = (ImageButton)
                             mRestaurantRecyclerView.getChildAt(previousPos).findViewById(R.id.menuBtn);
                     menuBtn.setVisibility(View.GONE);
 
@@ -252,12 +251,12 @@ public class RestaurantListActivity extends AppCompatActivity {
                 formChart(v);
                 formMenuBtn(v, screenHeight, screenWidth);
 
-                menuBtn  = (Button)
+                menuBtn = (ImageButton)
                         v.findViewById(R.id.menuBtn);
                 menuBtn.setVisibility(View.VISIBLE);
 
                 //Set hour label
-                lblHours  = (TextView)
+                lblHours = (TextView)
                         v.findViewById(R.id.lblHours);
                 lblHours.setVisibility(View.VISIBLE);
                 lblHours.setText(mRestaurant.getHours());
@@ -265,15 +264,11 @@ public class RestaurantListActivity extends AppCompatActivity {
                 lblWaitTime.setTextSize(30);
                 minLbl.setTextSize(30);
 
-                //Set arrow to up
-                arrow = (ImageView) v.findViewById(R.id.arrowView);
-                arrow.setImageDrawable(upArrow);
-
                 // Change background image to large
                 uploadScreenLayout(mRestaurant.getBackgroundImg(), currentPosition);
 
                 previousPos = currentPosition;
-            } else if (previousPos == currentPosition){
+            } else if (previousPos == currentPosition) {
 
                 // Collapse current position (set height to initial height)
                 Animation ani = new ShowAnim(mRestaurantRecyclerView.getChildAt(currentPosition), initialViewHeight, expandedViewHeight);
@@ -282,10 +277,10 @@ public class RestaurantListActivity extends AppCompatActivity {
                 mainLayout = (RelativeLayout)
                         mRestaurantRecyclerView.getChildAt(currentPosition).findViewById(R.id.content);
                 mainLayout.setVisibility(View.GONE);
-                lblHours  = (TextView)
+                lblHours = (TextView)
                         mRestaurantRecyclerView.getChildAt(previousPos).findViewById(R.id.lblHours);
                 lblHours.setVisibility(View.GONE);
-                menuBtn  = (Button)
+                menuBtn = (ImageButton)
                         mRestaurantRecyclerView.getChildAt(previousPos).findViewById(R.id.menuBtn);
                 menuBtn.setVisibility(View.GONE);
 
@@ -298,27 +293,43 @@ public class RestaurantListActivity extends AppCompatActivity {
                 arrow = (ImageView) mRestaurantRecyclerView.getChildAt(previousPos).findViewById(R.id.arrowView);
                 arrow.setImageDrawable(downArrow);
 
+                //Set arrow to up
+                arrow = (ImageView) v.findViewById(R.id.arrowView);
+                arrow.setImageDrawable(upArrow);
+
                 previousPos = -1;
             }
 
         }
 
-        private void uploadScreenLayout(String url, final int pos){
-            System.out.println("upload Screen "+ url);
+        //uploadScreenLayout loads the url image into the designated list view
+        //url is the link to the image
+        //pos is the list view item position
+        private void uploadScreenLayout(String url, final int pos) {
+            System.out.println("upload Screen " + url);
             Picasso.with(getApplicationContext()).load(url).into(screenLayoutList.get(pos));
         }
 
-        private void formChart(View v){
+        private void formChart(View v) {
             //To set dates we need to create date formatter that extends IAxisValueFormatter
             //https://github.com/PhilJay/MPAndroidChart/blob/2d18d0695b5d6d849b249e609f66192664e118e5/MPChartExample/src/com/xxmassdeveloper/mpchartexample/custom/DayAxisValueFormatter.java
             //https://github.com/PhilJay/MPAndroidChart/wiki/The-AxisValueFormatter-interface
 
             BarChart chart = (BarChart) v.findViewById(R.id.chart);
             List<BarEntry> entries = new ArrayList<>();
-            for(GraphPoint entry : mRestaurant.getAnalytics()){
-                entries.add(new BarEntry(entry.getX(), entry.getY()));
-            }
-
+//            for (GraphPoint entry : mRestaurant.getAnalytics()) {
+//                BarEntry barEntry = new BarEntry(entry.getX(), entry.getY());
+//                entries.add(barEntry);
+//            }
+            long epochTime = System.currentTimeMillis();
+            //int epochTime = 1481163967815;
+            entries.add(new BarEntry(epochTime, 30f));
+            entries.add(new BarEntry(epochTime +100000, 80f));
+            entries.add(new BarEntry(epochTime +200000, 60f));
+            entries.add(new BarEntry(epochTime +300000, 50f));
+            entries.add(new BarEntry(epochTime +400000, 70f));
+            entries.add(new BarEntry(epochTime +500000, 60f));
+            entries.add(new BarEntry(epochTime +600000, 20f));
 
             IAxisValueFormatter xAxisFormatter = new DateAxisValueFormatter(chart);
 
@@ -328,36 +339,56 @@ public class RestaurantListActivity extends AppCompatActivity {
             xAxis.setLabelCount(7);
             xAxis.setValueFormatter(xAxisFormatter);
 
-            BarDataSet set = new BarDataSet(entries, mRestaurant.getName()+"'s Wait Times");
+            BarDataSet set = new BarDataSet(entries, mRestaurant.getName() + "'s Wait Times");
+
+            int[] colors = new int[entries.size()];
+
+            for(int i = 0; i < entries.size(); i++) {
+                if (entries.get(i).getY() < 30) {
+                    colors[i] = R.color.lightGreen;
+                    System.out.println("Light Green");
+                } else if (entries.get(i).getY() < 70) {
+                    colors[i] = R.color.lightOrange;
+                    System.out.println("light orange");
+                } else {
+                    colors[i] = R.color.darkOrange;
+                    System.out.println("darkOrange");
+                }
+            }
+
+            set.setColors(colors, getApplicationContext());
+
 
             BarData data = new BarData(set);
 
-            data.setBarWidth(100000); // set custom bar width
+            data.setBarWidth(1f); // set custom bar width
 
             chart.setData(data);
             chart.setFitBars(false); // make the x-axis fit exactly all bars
             chart.invalidate(); // refresh
         }
 
-        private void formMenuBtn(View v, final int screenHeight, final int screenWidth){
+        private void formMenuBtn(View v, final int screenHeight, final int screenWidth) {
             //Set menu button
-            Button menuButton = (Button) v.findViewById(R.id.menuBtn);
+            ImageButton menuButton = (ImageButton) v.findViewById(R.id.menuBtn);
             menuButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     System.out.println("clicked");
                     String url = mRestaurant.getMenuURL();
 
-                 MenuImgDialogFragment dialogFragment = new MenuImgDialogFragment();
-                 //Pass Arguments
-                 Bundle args = new Bundle();
-                 args.putString("url", url);
-                 args.putInt("screenHeight", screenHeight);
-                 args.putInt("screenWidth", screenWidth);
-                 dialogFragment.setArguments(args);
-                 // Show DialogFragment
-                 dialogFragment.show(fm, "Dialog Fragment");
+                    //Upload image from url and display it in menuImgDialogFragment
+                    MenuImgDialogFragment dialogFragment = new MenuImgDialogFragment();
+                    //Pass Arguments
+                    Bundle args = new Bundle();
+                    args.putString("url", url); //url containing image information
+                    args.putInt("screenHeight", screenHeight);
+                    args.putInt("screenWidth", screenWidth);
+                    dialogFragment.setArguments(args);
+                    // Show DialogFragment
+                    dialogFragment.show(fm, "Dialog Fragment");
 
+                    //Download pdf given url and view it through new activity
 //                    String uniqueID = UUID.randomUUID().toString();
 //                    System.out.println(url);
 //                    download(url, uniqueID+".pdf");
@@ -367,24 +398,22 @@ public class RestaurantListActivity extends AppCompatActivity {
             });
         }
 
-        public void download(String url, String fileName)
-        {
+        public void download(String url, String fileName) {
             new DownloadFile().execute(url, fileName);
         }
 
-        public void view(String url)
-        {
+        public void view(String url) {
             File pdfFile = new File(Environment.getExternalStorageDirectory() + "/RushHourPdfs/" + url);  // -> filename = maven.pdf
             Uri path = Uri.fromFile(pdfFile);
-            System.out.println("Uri Path: "+ path);
+            System.out.println("Uri Path: " + path);
             Intent pdfIntent = new Intent(Intent.ACTION_VIEW);
             pdfIntent.setDataAndType(path, "application/pdf");
             pdfIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             pdfIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-            try{
+            try {
                 startActivity(pdfIntent);
-            }catch(ActivityNotFoundException e){
+            } catch (ActivityNotFoundException e) {
                 Toast.makeText(getApplicationContext(), "No Application available to view PDF", Toast.LENGTH_SHORT).show();
             }
         }
@@ -401,9 +430,9 @@ public class RestaurantListActivity extends AppCompatActivity {
 
                 File pdfFile = new File(folder, fileName);
 
-                try{
+                try {
                     pdfFile.createNewFile();
-                }catch (IOException e){
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
                 FileDownloader.downloadFile(fileUrl, pdfFile);
@@ -415,7 +444,7 @@ public class RestaurantListActivity extends AppCompatActivity {
     private class RestaurantAdapter extends RecyclerView.Adapter<RestaurantHolder> {
         private List<Restaurant> mRestaurants;
 
-        public RestaurantAdapter(List<Restaurant> restaurants){
+        public RestaurantAdapter(List<Restaurant> restaurants) {
             mRestaurants = restaurants;
         }
 
@@ -438,19 +467,19 @@ public class RestaurantListActivity extends AppCompatActivity {
             return mRestaurants.size();
         }
 
-        public void setRestaurants(List<Restaurant> restaurants){
+        public void setRestaurants(List<Restaurant> restaurants) {
             mRestaurants = restaurants;
         }
     }
 
-    public void updateUI(){
+    public void updateUI() {
 
         mRootRef.addValueEventListener(new ValueEventListener() {
 
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if(!listDataRestaurant.isEmpty()) {
+                if (!listDataRestaurant.isEmpty()) {
                     listDataRestaurant.removeAll(listDataRestaurant);
                 }
 
@@ -458,21 +487,21 @@ public class RestaurantListActivity extends AppCompatActivity {
 
                 Iterator it = data.entrySet().iterator();
                 while (it.hasNext()) {
-                    HashMap.Entry pair = (HashMap.Entry)it.next();
+                    HashMap.Entry pair = (HashMap.Entry) it.next();
 
                     String name = (String) pair.getKey();
                     String hours = "Not Available";
                     String menuURL = "";
-                    String backgroundImage =  null;
+                    String backgroundImage = null;
                     String slimBackgroundImg = null;
                     long waitTime = 0;
 
                     HashMap values = (HashMap) pair.getValue();
                     Iterator itTwo = values.entrySet().iterator();
-                    while (itTwo.hasNext()){
-                        HashMap.Entry set = (HashMap.Entry)itTwo.next();
+                    while (itTwo.hasNext()) {
+                        HashMap.Entry set = (HashMap.Entry) itTwo.next();
 
-                        switch((String)set.getKey()){
+                        switch ((String) set.getKey()) {
                             case "hours":
                                 hours = (String) set.getValue();
                                 break;
@@ -494,7 +523,7 @@ public class RestaurantListActivity extends AppCompatActivity {
                         itTwo.remove();
                     }
 
-                    listDataRestaurant.add(new Restaurant(name, (int)waitTime, hours, menuURL, backgroundImage, slimBackgroundImg));
+                    listDataRestaurant.add(new Restaurant(name, (int) waitTime, hours, menuURL, backgroundImage, slimBackgroundImg));
                     it.remove();
                 }
 
@@ -509,24 +538,22 @@ public class RestaurantListActivity extends AppCompatActivity {
                 System.out.println("-----------------------");
 
                 //set random graph pts for restaurant
-                for(Restaurant r: listDataRestaurant){
+                for (Restaurant r : listDataRestaurant) {
                     int count = 1;
                     List<GraphPoint> pts = new ArrayList<>();
-                    Random rand= new Random();
+                    Random rand = new Random();
                     long epochTime = System.currentTimeMillis();
-                    for(int i = 0; i <10; i++){
-
-                        pts.add(new GraphPoint(epochTime,i*(rand.nextInt(50)+1)*count));
-                        epochTime = System.currentTimeMillis() + (i*100000);
+                    for (int i = 0; i < 10; i++) {
+                        pts.add(new GraphPoint(epochTime, i * (rand.nextInt(50) + 1) * count));
                     }
                     r.setAnalytics(pts);
                     count++;
                 }
 
-                if(mAdapter == null) {
+                if (mAdapter == null) {
                     mAdapter = new RestaurantAdapter(listDataRestaurant);
                     mRestaurantRecyclerView.setAdapter(mAdapter);
-                } else{
+                } else {
                     mAdapter.setRestaurants(listDataRestaurant);
                     mAdapter.notifyDataSetChanged();
                 }
