@@ -1,7 +1,9 @@
 package com.cbu.dunckel.rushhour;
 
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -9,13 +11,18 @@ import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.pdf.PdfRenderer;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.StrictMode;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -67,15 +74,16 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 
 public class RestaurantListActivity extends AppCompatActivity {
 
-    ExpandableListAdapter listAdapter;
-    ExpandableListView expListView;
-    List<Restaurant> listDataRestaurant = new ArrayList<Restaurant>();
-    HashMap<String, List<Restaurant>> listDataChild;
-    private Button menuButton;
+    public static List<Restaurant> listDataRestaurant = new ArrayList<Restaurant>();
     FragmentManager fm = getSupportFragmentManager();
 
     private RecyclerView mRestaurantRecyclerView;
@@ -83,35 +91,35 @@ public class RestaurantListActivity extends AppCompatActivity {
 
     DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
 
-    private int currentPos;
     private int previousPos = -1;
     private List<CustomLayout> screenLayoutList = new ArrayList<>();
 
+    static int currentPosition;
+
+    Intent serviceIntent;
+
+    LinearLayoutManager mLayoutManager;
+
+    boolean alreadyExecuted = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView((R.layout.restaurant_list));
-        mRestaurantRecyclerView = (RecyclerView) findViewById(R.id.crime_recycler_view);
-        mRestaurantRecyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+        serviceIntent = new Intent(getApplicationContext(), LocationService.class);
 
-//        if(savedInstanceState != null){
-//            mSubtitleVisible = savedInstanceState.getBoolean(SAVED_SUBTITLE_VISIBLE);
-//        }
+        setContentView((R.layout.restaurant_list));
+        mLayoutManager = new LinearLayoutManager(getApplicationContext());
+        mRestaurantRecyclerView = (RecyclerView) findViewById(R.id.crime_recycler_view);
+        mRestaurantRecyclerView.setLayoutManager(mLayoutManager);
 
         updateUI();
-
-
-        // preparing list data
-        //prepareListData();
-
-//        setContentView(R.layout.activity_restaurant_list);
-//
-//        // get the listview
-//        expListView = (ExpandableListView) findViewById(R.id.expandableRestaurantList);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
 
     @Override
     public void onResume() {
@@ -133,7 +141,6 @@ public class RestaurantListActivity extends AppCompatActivity {
     private class RestaurantHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private CustomLayout screenLayout;
-        private ImageView backgroundImg;
         private TextView lblListHeader;
         private TextView lblWaitTime;
         private TextView minLbl;
@@ -193,8 +200,6 @@ public class RestaurantListActivity extends AppCompatActivity {
             Drawable upArrow = getResources().getDrawable(R.drawable.up_arrow);
             Drawable downArrow = getResources().getDrawable(R.drawable.down_arrow);
 
-
-            int viewPosition = mRestaurantRecyclerView.getChildAdapterPosition(v);
             int animDownTime = 190;
             int animUpTime = 190;
             int initialViewHeight = viewHeight;
@@ -207,34 +212,34 @@ public class RestaurantListActivity extends AppCompatActivity {
             int screenHeight = size.y;
 
             int expandedViewHeight = viewHeight + (screenHeight * 3 / 8);
-            System.out.println("\nIteration........\n ");
+
             //Modify item height and add widgets of item, hide widgets of all other items
-            int currentPosition = mRestaurantRecyclerView.getChildAdapterPosition(v);
+            currentPosition = mRestaurantRecyclerView.getChildAdapterPosition(v);
 
             if (previousPos != currentPosition) {
-                System.out.println(previousPos + " " + currentPosition);
+
                 // First - collapse previous position (set height to initial height)
                 if (previousPos != -1) {
-                    Animation ani = new ShowAnim(mRestaurantRecyclerView.getChildAt(previousPos), initialViewHeight, expandedViewHeight);
+                    Animation ani = new ShowAnim(mLayoutManager.findViewByPosition(previousPos), initialViewHeight, expandedViewHeight);
                     ani.setDuration(animUpTime);
-                    mRestaurantRecyclerView.getChildAt(previousPos).startAnimation(ani);
+                    mLayoutManager.findViewByPosition(previousPos).startAnimation(ani);
                     mainLayout = (RelativeLayout)
-                            mRestaurantRecyclerView.getChildAt(previousPos).findViewById(R.id.content);
+                            mLayoutManager.findViewByPosition(previousPos).findViewById(R.id.content);
                     mainLayout.setVisibility(View.GONE);
                     lblHours = (TextView)
-                            mRestaurantRecyclerView.getChildAt(previousPos).findViewById(R.id.lblHours);
+                            mLayoutManager.findViewByPosition(previousPos).findViewById(R.id.lblHours);
                     lblHours.setVisibility(View.GONE);
                     menuBtn = (ImageButton)
-                            mRestaurantRecyclerView.getChildAt(previousPos).findViewById(R.id.menuBtn);
+                            mLayoutManager.findViewByPosition(previousPos).findViewById(R.id.menuBtn);
                     menuBtn.setVisibility(View.GONE);
 
-                    prevWaitLbl = (TextView) mRestaurantRecyclerView.getChildAt(previousPos).findViewById(R.id.lblWaitTime);
+                    prevWaitLbl = (TextView) mLayoutManager.findViewByPosition(previousPos).findViewById(R.id.lblWaitTime);
                     prevWaitLbl.setTextSize(24);
-                    prevMinLbl = (TextView) mRestaurantRecyclerView.getChildAt(previousPos).findViewById(R.id.minLbl);
+                    prevMinLbl = (TextView) mLayoutManager.findViewByPosition(previousPos).findViewById(R.id.minLbl);
                     prevMinLbl.setTextSize(24);
 
                     //Set arrow to down
-                    arrow = (ImageView) mRestaurantRecyclerView.getChildAt(previousPos).findViewById(R.id.arrowView);
+                    arrow = (ImageView) mLayoutManager.findViewByPosition(previousPos).findViewById(R.id.arrowView);
                     arrow.setImageDrawable(downArrow);
 
                     // Change background image to slim
@@ -267,21 +272,25 @@ public class RestaurantListActivity extends AppCompatActivity {
                 // Change background image to large
                 uploadScreenLayout(mRestaurant.getBackgroundImg(), currentPosition);
 
+                //Set arrow to down
+                arrow = (ImageView) v.findViewById(R.id.arrowView);
+                arrow.setImageDrawable(upArrow);
+
                 previousPos = currentPosition;
             } else if (previousPos == currentPosition) {
 
                 // Collapse current position (set height to initial height)
-                Animation ani = new ShowAnim(mRestaurantRecyclerView.getChildAt(currentPosition), initialViewHeight, expandedViewHeight);
+                Animation ani = new ShowAnim(mLayoutManager.findViewByPosition(currentPosition), initialViewHeight, expandedViewHeight);
                 ani.setDuration(animUpTime);
-                mRestaurantRecyclerView.getChildAt(currentPosition).startAnimation(ani);
+                mLayoutManager.findViewByPosition(currentPosition).startAnimation(ani);
                 mainLayout = (RelativeLayout)
-                        mRestaurantRecyclerView.getChildAt(currentPosition).findViewById(R.id.content);
+                        mLayoutManager.findViewByPosition(currentPosition).findViewById(R.id.content);
                 mainLayout.setVisibility(View.GONE);
                 lblHours = (TextView)
-                        mRestaurantRecyclerView.getChildAt(previousPos).findViewById(R.id.lblHours);
+                        mLayoutManager.findViewByPosition(currentPosition).findViewById(R.id.lblHours);
                 lblHours.setVisibility(View.GONE);
                 menuBtn = (ImageButton)
-                        mRestaurantRecyclerView.getChildAt(previousPos).findViewById(R.id.menuBtn);
+                        mLayoutManager.findViewByPosition(currentPosition).findViewById(R.id.menuBtn);
                 menuBtn.setVisibility(View.GONE);
 
                 lblWaitTime.setTextSize(24);
@@ -290,12 +299,8 @@ public class RestaurantListActivity extends AppCompatActivity {
                 uploadScreenLayout(mRestaurant.getSlimBackgroundImg(), currentPosition);
 
                 //Set arrow to down
-                arrow = (ImageView) mRestaurantRecyclerView.getChildAt(previousPos).findViewById(R.id.arrowView);
+                arrow = (ImageView) mLayoutManager.findViewByPosition(previousPos).findViewById(R.id.arrowView);
                 arrow.setImageDrawable(downArrow);
-
-                //Set arrow to up
-                arrow = (ImageView) v.findViewById(R.id.arrowView);
-                arrow.setImageDrawable(upArrow);
 
                 previousPos = -1;
             }
@@ -306,7 +311,6 @@ public class RestaurantListActivity extends AppCompatActivity {
         //url is the link to the image
         //pos is the list view item position
         private void uploadScreenLayout(String url, final int pos) {
-            System.out.println("upload Screen " + url);
             Picasso.with(getApplicationContext()).load(url).into(screenLayoutList.get(pos));
         }
 
@@ -321,15 +325,15 @@ public class RestaurantListActivity extends AppCompatActivity {
 //                BarEntry barEntry = new BarEntry(entry.getX(), entry.getY());
 //                entries.add(barEntry);
 //            }
-            long epochTime = System.currentTimeMillis();
-            //int epochTime = 1481163967815;
+//            long epochTime = System.currentTimeMillis();
+            int epochTime = 1;
             entries.add(new BarEntry(epochTime, 30f));
-            entries.add(new BarEntry(epochTime +100000, 80f));
-            entries.add(new BarEntry(epochTime +200000, 60f));
-            entries.add(new BarEntry(epochTime +300000, 50f));
-            entries.add(new BarEntry(epochTime +400000, 70f));
-            entries.add(new BarEntry(epochTime +500000, 60f));
-            entries.add(new BarEntry(epochTime +600000, 20f));
+            entries.add(new BarEntry(epochTime +1, 80f));
+            entries.add(new BarEntry(epochTime +2, 60f));
+            entries.add(new BarEntry(epochTime +3, 50f));
+            entries.add(new BarEntry(epochTime +4, 70f));
+            entries.add(new BarEntry(epochTime +5, 60f));
+            entries.add(new BarEntry(epochTime +6, 20f));
 
             IAxisValueFormatter xAxisFormatter = new DateAxisValueFormatter(chart);
 
@@ -346,13 +350,10 @@ public class RestaurantListActivity extends AppCompatActivity {
             for(int i = 0; i < entries.size(); i++) {
                 if (entries.get(i).getY() < 30) {
                     colors[i] = R.color.lightGreen;
-                    System.out.println("Light Green");
                 } else if (entries.get(i).getY() < 70) {
                     colors[i] = R.color.lightOrange;
-                    System.out.println("light orange");
                 } else {
                     colors[i] = R.color.darkOrange;
-                    System.out.println("darkOrange");
                 }
             }
 
@@ -361,7 +362,7 @@ public class RestaurantListActivity extends AppCompatActivity {
 
             BarData data = new BarData(set);
 
-            data.setBarWidth(1f); // set custom bar width
+            data.setBarWidth(.85f); // set custom bar width
 
             chart.setData(data);
             chart.setFitBars(false); // make the x-axis fit exactly all bars
@@ -374,7 +375,6 @@ public class RestaurantListActivity extends AppCompatActivity {
             menuButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    System.out.println("clicked");
                     String url = mRestaurant.getMenuURL();
 
                     //Upload image from url and display it in menuImgDialogFragment
@@ -405,7 +405,6 @@ public class RestaurantListActivity extends AppCompatActivity {
         public void view(String url) {
             File pdfFile = new File(Environment.getExternalStorageDirectory() + "/RushHourPdfs/" + url);  // -> filename = maven.pdf
             Uri path = Uri.fromFile(pdfFile);
-            System.out.println("Uri Path: " + path);
             Intent pdfIntent = new Intent(Intent.ACTION_VIEW);
             pdfIntent.setDataAndType(path, "application/pdf");
             pdfIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -453,6 +452,7 @@ public class RestaurantListActivity extends AppCompatActivity {
             LayoutInflater layoutInflater = LayoutInflater.from(getApplicationContext());
             View view = layoutInflater
                     .inflate(R.layout.list_group, parent, false);
+//            mViews.add(view);
             return new RestaurantHolder(view);
         }
 
@@ -494,6 +494,8 @@ public class RestaurantListActivity extends AppCompatActivity {
                     String menuURL = "";
                     String backgroundImage = null;
                     String slimBackgroundImg = null;
+                    double latitude = 0;
+                    double longitude = 0;
                     long waitTime = 0;
 
                     HashMap values = (HashMap) pair.getValue();
@@ -517,13 +519,24 @@ public class RestaurantListActivity extends AppCompatActivity {
                             case "slim background image":
                                 slimBackgroundImg = (String) set.getValue();
                                 break;
+                            case "latitude":
+                                latitude = (Double) set.getValue();
+                                break;
+                            case "longitude":
+                                longitude = (Double) set.getValue();
+                                break;
                             default:
                                 break;
                         }
                         itTwo.remove();
                     }
 
-                    listDataRestaurant.add(new Restaurant(name, (int) waitTime, hours, menuURL, backgroundImage, slimBackgroundImg));
+                    //Set Restaurant Location
+                    Location loc = new Location("");
+                    loc.setLatitude(latitude);
+                    loc.setLongitude(longitude);
+
+                    listDataRestaurant.add(new Restaurant(name, (int) waitTime, hours, menuURL, backgroundImage, slimBackgroundImg, loc));
                     it.remove();
                 }
 
@@ -557,6 +570,23 @@ public class RestaurantListActivity extends AppCompatActivity {
                     mAdapter.setRestaurants(listDataRestaurant);
                     mAdapter.notifyDataSetChanged();
                 }
+
+                if(!alreadyExecuted) {
+                    alreadyExecuted = true;
+                    //Start service after updateUI to retrieve restaurant data
+                    ArrayList<Restaurant> restaurantList = new ArrayList<Restaurant>();
+                    for (Restaurant restaurant : listDataRestaurant) {
+                        restaurantList.add(restaurant);
+                    }
+                    serviceIntent.putParcelableArrayListExtra("restaurantList", restaurantList);
+                    startService(serviceIntent);
+                }
+
+                //Decay timer
+                //On data change start timer to wait five minutes,
+                //if after five minutes data does not change
+                //subtract wait time of restaurant by one minute
+
             }
 
             @Override

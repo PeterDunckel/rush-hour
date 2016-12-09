@@ -1,5 +1,6 @@
 package com.cbu.dunckel.rushhour;
 
+import android.location.Location;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
@@ -50,6 +51,8 @@ public class RestaurantSingleton {
                     String menuURL = "";
                     String backgroundImg = null;
                     String slimBackgroundImg = null;
+                    long latitude = 0;
+                    long longitude = 0;
 
                     HashMap values = (HashMap) pair.getValue();
                     Iterator itTwo = values.entrySet().iterator();
@@ -72,13 +75,24 @@ public class RestaurantSingleton {
                             case "slim background image":
                                 slimBackgroundImg = (String) set.getValue();
                                 break;
+                            case "latitude":
+                                latitude = (long) set.getValue();
+                                break;
+                            case "longitude":
+                                longitude = (long) set.getValue();
+                                break;
                             default:
                                 break;
                         }
                         itTwo.remove();
                     }
 
-                    restaurantArray.add(new Restaurant(name, (int)waitTime, hours, menuURL, backgroundImg, slimBackgroundImg));
+                    //Set Restaurant Location
+                    Location loc = new Location("");
+                    loc.setLatitude(33.9284067);
+                    loc.setLongitude(-117.4277483);
+
+                    restaurantArray.add(new Restaurant(name, (int)waitTime, hours, menuURL, backgroundImg, slimBackgroundImg, loc));
 
                     it.remove();
                 }
